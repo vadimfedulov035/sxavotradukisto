@@ -34,26 +34,61 @@ def latina_al_sxava(teksto):
     return teksto
 
 
+def sesumigi(deknombro):
+    sesnombro = np.base_repr(int(deknombro), base=6)
+    return sesnombro
+
+
+def dekumigi(sesnombro):
+    deknombro = int(str(sesnombro), 6)
+    return deknombro
+
+
 def dekuma_al_sesuma(teksto):
-    deknombroj = re.findall(r"\d+", teksto)
+    deknombroj = re.findall(r"/\d+", teksto)
     sesnombroj = []
     for deknombro in deknombroj:
-        sesnombro = np.base_repr(int(deknombro), base=6)
+        sesnombro = sesumigi(deknombro)
         sesnombroj.append(sesnombro)
     for deknombro, sesnombro in zip(deknombroj, sesnombroj):
-        teksto = re.sub(deknombro, sesnombro, teksto)
+        teksto = re.sub(deknombro, f"{sesnombro}₁₀", teksto)
     return teksto
 
 
 def sesuma_al_dekuma(teksto):
-    sesnombroj = re.findall(r"\d+", teksto)
+    sesnombroj = re.findall(r"\\\d+", teksto)
     deknombroj = []
     for sesnombro in sesnombroj:
-        deknombro = int(str(sesnombro), 6)
+        deknombro = dekumigi(sesnombro)
         deknombroj.append(deknombro)
     for sesnombro, deknombro in zip(deknombroj, sesnombroj):
-        teksto = re.sub(sesnombro, deknombro, teksto)
+        teksto = re.sub(sesnombro, f"{deknombro}ₓ", teksto)
     return teksto
+
+
+def kalkuli(teksto):
+    esprimoj = re.finditer(r"(?P<nombro_1>\d+)(?P<sistemo_1>ₓ|₁₀)\s*(?P<operacio>\+|-|\*|\/)\s?(?P<nombro_2>\d+)(?P<sistemo_2>ₓ|₁₀)=", teksto)
+    for esprimo in esprimoj:
+        nombro_1, nombro_2 = match.group("nombro_1"), match.group("nombro_2")
+        sistemo_1, sistemo_2 = match.group("sistemo_1"), match.group("sistemo_2")
+        operacio = match.group("operacio")
+        if sistemo_1 == "₁₀":
+            nombro_1 = dekumigi(int(nombro_1))
+        if sistemo_2 == "₁₀":
+            nombro_2 = dekumigi(int(nombro_2))
+        match operacio:
+            case "+":
+                rezultnombro = nombro_1 + nombro_2
+            case "-":
+                rezultnombro = nombro_1 - nombro_2
+            case "*":
+                rezultnombro = nombro_1 * nombro_2
+            case "/":
+                rezultnombro = nombro_1 / nombro_2
+        teksto = re.sub(esprimo, f"{sesumigi(rezultnombro)}₁₀ aŭ {rezultnombro}ₓ", teksto)
+
+
+
 
 
 def divenu_lingvon(teksto):
@@ -73,10 +108,10 @@ def get_text_messages(message):
     match lingvo:
         case "sxava":
             traduko = sxava_al_latina(originalo)
-            traduko = sesuma_al_dekuma(traduko)
         case "latina":
             traduko = latina_al_sxava(originalo)
-            traduko = dekuma_al_sesuma(traduko)
+    traduko = dekuma_al_sesuma(traduko)
+    traduko = sesuma_al_dekuma(traduko)
     teksto = f"<tg-spoiler>{originalo}</tg-spoiler>\n\n{traduko}"
     bot.send_message(message.chat.id, teksto, parse_mode="HTML")
 

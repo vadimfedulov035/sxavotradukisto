@@ -10,6 +10,10 @@ with open("token.cfg", "r", encoding="utf-8") as f:
     token = f.read().rstrip()
 
 
+with open("bonvenigo.txt", "r", encoding="utf-8") as f:
+    bonvenigo = f.read().rstrip()
+
+
 with open("bazvortaro.json", "r", encoding="utf-8") as f:
     sxava_bazvortaro = json.load(f)
     latina_bazvortaro = {v: k for k, v in sxava_bazvortaro.items()}
@@ -57,6 +61,12 @@ def sxavigi(teksto):
     teksto = traduki(teksto, latina_reformvortaro)
     teksto = traduki(teksto, latina_bazvortaro)
     return teksto
+
+
+@bot.message_handler(commands=['/start'])
+def start(message):
+    with open(f"bonvenbildo.jpg", "rb") as f:
+        bot.send_photo(message.from_user.id, f, caption=bonvenigo)
 
 
 @bot.message_handler(content_types="text")

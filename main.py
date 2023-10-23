@@ -63,10 +63,11 @@ def sxavigi(teksto):
     return teksto
 
 
-@bot.message_handler(commands=['/start'])
+@bot.message_handler(commands=['start'])
 def start(message):
-    with open(f"bonvenbildo.jpg", "rb") as f:
+    with open(f"bonvenigo.png", "rb") as f:
         bot.send_photo(message.from_user.id, f, caption=bonvenigo)
+
 
 
 @bot.message_handler(content_types="text")
